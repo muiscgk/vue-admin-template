@@ -1,33 +1,40 @@
-import { login, logout, getInfo } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
-import { resetRouter } from '@/router'
+import {login, logout, getInfo} from '@/api/user'
+import {getToken, setToken, removeToken} from '@/utils/auth'
+import {resetRouter} from '@/router'
+
+import * as TYPES from '../types'
 
 const state = {
   token: getToken(),
   name: '',
-  avatar: ''
+  avatar: '',
+  id: ''
 }
 
 const mutations = {
-  SET_TOKEN: (state, token) => {
+  [TYPES.SET_TOKEN]: (state, token) => {
     state.token = token
   },
-  SET_NAME: (state, name) => {
+  [TYPES.SET_NAME]: (state, name) => {
     state.name = name
   },
-  SET_AVATAR: (state, avatar) => {
+  [TYPES.SET_AVATAR]: (state, avatar) => {
     state.avatar = avatar
+  },
+  [TYPES.SET_ID]: (state, userId) => {
+    state.id = userId
   }
 }
 
 const actions = {
   // user login
-  login({ commit }, userInfo) {
-    const { username, password } = userInfo
+  login({commit}, userInfo) {
+    const {username, password} = userInfo
     return new Promise((resolve, reject) => {
-      login({ username: username.trim(), password: password }).then(response => {
-        const { data } = response
-        commit('SET_TOKEN', data.token)
+      login({username: username.trim(), password: password}).then(response => {
+        const {data} = response
+        commit(TYPES.SET_TOKEN, data.token)
+        commit(TYPES.SET_ID,data.id)
         setToken(data.token)
         resolve()
       }).catch(error => {
@@ -37,19 +44,19 @@ const actions = {
   },
 
   // get user info
-  getInfo({ commit, state }) {
+  getInfo({commit, state}) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
-        const { data } = response
+      getInfo(state.id).then(response => {
+        const {data} = response
 
         if (!data) {
           reject('Verification failed, please Login again.')
         }
 
-        const { name, avatar } = data
+        const {name, avatar} = data
 
-        commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
+        commit(TYPES.SET_NAME, name)
+        commit(TYPES.SET_AVATAR, avatar)
         resolve(data)
       }).catch(error => {
         reject(error)
@@ -58,10 +65,10 @@ const actions = {
   },
 
   // user logout
-  logout({ commit, state }) {
+  logout({commit, state}) {
     return new Promise((resolve, reject) => {
       logout(state.token).then(() => {
-        commit('SET_TOKEN', '')
+        commit(TYPES.SET_TOKEN, '')
         removeToken()
         resetRouter()
         resolve()
@@ -72,9 +79,9 @@ const actions = {
   },
 
   // remove token
-  resetToken({ commit }) {
+  resetToken({commit}) {
     return new Promise(resolve => {
-      commit('SET_TOKEN', '')
+      commit(TYPES.SET_TOKEN, '')
       removeToken()
       resolve()
     })

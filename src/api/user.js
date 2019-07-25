@@ -2,17 +2,17 @@ import request from '@/utils/request'
 
 export function login(data) {
   return request({
-    url: '/user/login',
+    url: '/sys/auth/login.do',
     method: 'post',
-    data
+    params: data
   })
 }
 
-export function getInfo(token) {
+export function getInfo(userId) {
   return request({
-    url: '/user/info',
+    url: '/sys/user/userInfo.do',
     method: 'get',
-    params: { token }
+    params: {userId: userId}
   })
 }
 
